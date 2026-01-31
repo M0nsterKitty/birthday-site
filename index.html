@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background: black;
+  overflow: hidden;
+  height: 100vh;
+  color: #ff4fd8;
+}
+
+/* ROTATE */
+#rotate {
+  position: fixed;
+  inset: 0;
+  background: black;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+  text-align: center;
+}
+
+#rotate h1 { font-size: 26px; }
+#rotate p { opacity: 0.7; }
+
+/* MATRIX */
+canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+/* MAIN */
+#main {
+  display: none;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+}
+
+/* CENTER TEXT */
+#centerText {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 64px;
+  font-weight: bold;
+  color: #ff4fd8;
+  animation: pop 1.2s ease;
+}
+
+@keyframes pop {
+  from { transform: scale(0.7); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* FINAL */
+#final {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+/* CAT + CAKE */
+#cat {
+  font-size: 120px;
+  animation: bounce 1.6s infinite;
+}
+
+#cake {
+  font-size: 90px;
+  margin-top: -30px;
+}
+
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-25px); }
+}
+</style>
+</head>
+
+<body>
+
+<div id="rotate">
+  <h1>📱 Telefonu Yana Çevir</h1>
+  <p>Devam etmek için yatay konuma al</p>
+</div>
+
+<canvas id="matrix"></canvas>
+
+<div id="main">
+  <div id="centerText"></div>
+
+  <div id="final">
+    <div id="cat">🐱</div>
+    <div id="cake">🎂</div>
+  </div>
+</div>
+
+<script>
+/* MATRIX EFFECT */
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const letters = "HAPPYBIRTHDAY0123456789";
+const fontSize = 16;
+const columns = canvas.width / fontSize;
+const drops = Array(Math.floor(columns)).fill(1);
+
+function drawMatrix() {
+  ctx.fillStyle = "rgba(0,0,0,0.08)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  ctx.fillStyle = "#ff4fd8";
+  ctx.font = fontSize + "px monospace";
+
+  for (let i = 0; i < drops.length; i++) {
+    const text = letters[Math.floor(Math.random() * letters.length)];
+    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+    if (drops[i] * fontSize > canvas.height && Math.random() > 0.95)
+      drops[i] = 0;
+
+    drops[i]++;
+  }
+}
+
+setInterval(drawMatrix, 50);
+
+/* SEQUENCE */
+const rotate = document.getElementById("rotate");
+const main = document.getElementById("main");
+const text = document.getElementById("centerText");
+const final = document.getElementById("final");
+
+function showText(content, duration = 1600) {
+  return new Promise(res => {
+    text.innerText = content;
+    text.style.display = "flex";
+    setTimeout(() => {
+      text.style.display = "none";
+      res();
+    }, duration);
+  });
+}
+
+async function sequence() {
+  await showText("3", 1800);
+  await showText("2", 1800);
+  await showText("1", 1800);
+
+  await showText("Happy", 2000);
+  await showText("Birthday", 2200);
+  await showText("To", 1800);
+  await showText("You", 2200);
+
+  final.style.display = "flex";
+}
+
+let started = false;
+
+function check() {
+  if (innerWidth > innerHeight) {
+    rotate.style.display = "none";
+    main.style.display = "block";
+    if (!started) {
+      started = true;
+      sequence();
+    }
+  } else {
+    rotate.style.display = "flex";
+    main.style.display = "none";
+  }
+}
+
+addEventListener("resize", check);
+addEventListener("orientationchange", check);
+check();
+</script>
+
+</body>
+</html>
